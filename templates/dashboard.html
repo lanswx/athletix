@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>ATHLETIX — Athlete Intelligence Platform</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+
+    <!-- =========================
+         SIDEBAR
+    ========================== -->
+
+    <aside class="sidebar">
+
+        <div class="logo">
+            ATHLETIX
+        </div>
+
+
+        <nav>
+
+            <a href="#dashboard"
+               class="active">
+                Dashboard
+            </a>
+
+            <a href="#monitoring">
+                Monitoring
+            </a>
+
+            <a href="#ai-coach">
+                AI Coach
+            </a>
+
+            <a href="#schedule">
+                Schedule
+            </a>
+
+            <a href="#history">
+                History
+            </a>
+
+            <a href="#coach-dashboard">
+                Coach Dashboard
+            </a>
+
+        </nav>
+
+
+        <div class="device-status">
+
+            <span class="status-dot"></span>
+
+            Demo Mode
+
+        </div>
+
+    </aside>
+
+
+
+    <!-- =========================
+         MAIN
+    ========================== -->
+
+    <main class="main">
+
+
+        <!-- HEADER -->
+
+        <header class="header"
+                id="dashboard">
+
+            <div>
+
+                <p class="small-text">
+                    ATHLETIX · ATHLETE INTELLIGENCE
+                </p>
+
+                <h1>
+                    Good afternoon, Athlete
+                </h1>
+
+                <p class="header-subtitle">
+                    Real-time monitoring and adaptive training support
+                </p>
+
+            </div>
+
+
+            <div class="avatar">
+                A
+            </div>
+
+        </header>
+
+
+
+        <!-- =========================
+             CURRENT CONDITION
+        ========================== -->
+
+        <section class="status-banner">
+
+            <div>
+
+                <p class="small-text">
+                    CURRENT CONDITION
+                </p>
+
+                <h2 id="condition-status">
+                    Moderate Load
+                </h2>
+
+                <p id="condition-description">
+                    Your body is showing signs of accumulated fatigue.
+                </p>
+
+            </div>
+
+
+            <div class="risk">
+
+                <span>
+                    INJURY RISK ESTIMATE
+                </span>
+
+                <strong id="injury-risk">
+                    42%
+                </strong>
+
+                <small>
+                    MVP risk screening
+                </small>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             MAIN METRICS
+        ========================== -->
+
+        <section class="metrics">
+
+
+            <div class="card">
+
+                <span class="card-label">
+                    HEART RATE
+                </span>
+
+                <div class="metric">
+
+                    <strong id="heart-rate">
+                        82
+                    </strong>
+
+                    <span>
+                        BPM
+                    </span>
+
+                </div>
+
+                <p id="heart-status"
+                   class="positive">
+                    ● Normal
+                </p>
+
+            </div>
+
+
+
+            <div class="card">
+
+                <span class="card-label">
+                    FATIGUE
+                </span>
+
+                <div class="metric">
+
+                    <strong id="fatigue">
+                        68
+                    </strong>
+
+                    <span>
+                        %
+                    </span>
+
+                </div>
+
+                <p id="fatigue-status"
+                   class="warning">
+                    ● Elevated
+                </p>
+
+            </div>
+
+
+
+            <div class="card">
+
+                <span class="card-label">
+                    RECOVERY
+                </span>
+
+                <div class="metric">
+
+                    <strong id="recovery">
+                        54
+                    </strong>
+
+                    <span>
+                        %
+                    </span>
+
+                </div>
+
+                <p id="recovery-status"
+                   class="warning">
+                    ● Moderate
+                </p>
+
+            </div>
+
+
+
+            <div class="card">
+
+                <span class="card-label">
+                    TRAINING LOAD
+                </span>
+
+                <div class="metric">
+
+                    <strong id="training-load">
+                        76
+                    </strong>
+
+                    <span>
+                        %
+                    </span>
+
+                </div>
+
+                <p id="training-status"
+                   class="warning">
+                    ● Moderate
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             LIVE MONITORING
+        ========================== -->
+
+        <section class="monitoring-section"
+                 id="monitoring">
+
+
+            <div class="section-title">
+
+                <div>
+
+                    <p class="small-text">
+                        REAL-TIME BIOMETRICS
+                    </p>
+
+                    <h2>
+                        Live Monitoring
+                    </h2>
+
+                    <p class="section-subtitle">
+                        Continuous analysis of athlete condition
+                    </p>
+
+                </div>
+
+
+                <span class="live large-live">
+                    ● LIVE
+                </span>
+
+            </div>
+
+
+
+            <!-- HEART RATE -->
+
+            <div class="live-heart-card">
+
+
+                <div class="live-heart-info">
+
+                    <span class="card-label">
+                        CURRENT HEART RATE
+                    </span>
+
+
+                    <div class="big-heart-rate">
+
+                        <strong id="monitor-heart-rate">
+                            82
+                        </strong>
+
+                        <span>
+                            BPM
+                        </span>
+
+                    </div>
+
+
+                    <p id="monitor-heart-status"
+                       class="positive">
+
+                        ● Normal heart rate
+
+                    </p>
+
+                </div>
+
+
+
+                <div class="heart-pulse">
+
+                    <div class="pulse-circle">
+                        ♥
+                    </div>
+
+                    <div class="pulse-ring"></div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- HEART RATE GRAPH -->
+
+            <div class="monitor-chart-card">
+
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <p class="small-text">
+                            HEART RATE
+                        </p>
+
+                        <h2>
+                            Live Heart Rate
+                        </h2>
+
+                    </div>
+
+
+                    <span id="monitor-chart-value">
+                        -- BPM
+                    </span>
+
+                </div>
+
+
+                <div class="monitor-chart">
+
+                    <div class="monitor-grid"></div>
+
+
+                    <svg
+                        viewBox="0 0 1000 300"
+                        preserveAspectRatio="none"
+                    >
+
+                        <polyline
+                            id="heart-rate-line"
+                            points=""
+                            fill="none"
+                            stroke="#55a8ff"
+                            stroke-width="5"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+
+                    </svg>
+
+                </div>
+
+
+                <div class="chart-footer">
+
+                    <span>
+                        70 BPM
+                    </span>
+
+                    <span>
+                        Real-time
+                    </span>
+
+                    <span>
+                        125 BPM
+                    </span>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- BIOMETRIC CARDS -->
+
+            <div class="monitoring-grid">
+
+
+                <div class="monitor-card">
+
+                    <div class="monitor-card-top">
+
+                        <span class="card-label">
+                            FATIGUE
+                        </span>
+
+                        <span class="monitor-icon">
+                            F
+                        </span>
+
+                    </div>
+
+
+                    <strong id="monitor-fatigue">
+                        68%
+                    </strong>
+
+
+                    <div class="progress">
+
+                        <div
+                            id="fatigue-progress"
+                            class="progress-fill"
+                        ></div>
+
+                    </div>
+
+
+                    <p id="monitor-fatigue-status">
+                        Elevated
+                    </p>
+
+                </div>
+
+
+
+                <div class="monitor-card">
+
+                    <div class="monitor-card-top">
+
+                        <span class="card-label">
+                            RECOVERY
+                        </span>
+
+                        <span class="monitor-icon">
+                            R
+                        </span>
+
+                    </div>
+
+
+                    <strong id="monitor-recovery">
+                        54%
+                    </strong>
+
+
+                    <div class="progress">
+
+                        <div
+                            id="recovery-progress"
+                            class="progress-fill"
+                        ></div>
+
+                    </div>
+
+
+                    <p id="monitor-recovery-status">
+                        Moderate
+                    </p>
+
+                </div>
+
+
+
+                <div class="monitor-card">
+
+                    <div class="monitor-card-top">
+
+                        <span class="card-label">
+                            TRAINING LOAD
+                        </span>
+
+                        <span class="monitor-icon">
+                            T
+                        </span>
+
+                    </div>
+
+
+                    <strong id="monitor-training">
+                        76%
+                    </strong>
+
+
+                    <div class="progress">
+
+                        <div
+                            id="training-progress"
+                            class="progress-fill"
+                        ></div>
+
+                    </div>
+
+
+                    <p id="monitor-training-status">
+                        Moderate
+                    </p>
+
+                </div>
+
+
+
+                <div class="monitor-card risk-card">
+
+                    <div class="monitor-card-top">
+
+                        <span class="card-label">
+                            INJURY RISK
+                        </span>
+
+                        <span class="monitor-icon">
+                            !
+                        </span>
+
+                    </div>
+
+
+                    <strong id="monitor-risk">
+                        42%
+                    </strong>
+
+
+                    <div class="progress">
+
+                        <div
+                            id="risk-progress"
+                            class="progress-fill"
+                        ></div>
+
+                    </div>
+
+
+                    <p id="monitor-risk-status">
+                        Moderate risk
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             AI COACH
+        ========================== -->
+
+        <section class="ai-section"
+                 id="ai-coach">
+
+
+            <div class="section-title">
+
+                <div>
+
+                    <p class="small-text">
+                        AI-ASSISTED ANALYSIS
+                    </p>
+
+                    <h2>
+                        AI Coach
+                    </h2>
+
+                    <p class="section-subtitle">
+                        Adaptive training recommendation based on current indicators
+                    </p>
+
+                </div>
+
+
+                <span class="ai-status">
+                    ● ANALYSIS ACTIVE
+                </span>
+
+            </div>
+
+
+
+            <div class="ai-grid">
+
+
+                <!-- DECISION -->
+
+                <div class="ai-card">
+
+                    <span class="decision-label">
+                        TODAY'S DECISION
+                    </span>
+
+
+                    <h3 id="ai-decision-title">
+                        Moderate Training
+                    </h3>
+
+
+                    <p id="ai-decision-text">
+                        Your current indicators suggest maintaining
+                        moderate training intensity.
+                    </p>
+
+
+                    <div class="decision-intensity">
+
+                        <span>
+                            RECOMMENDED INTENSITY
+                        </span>
+
+                        <strong id="ai-intensity">
+                            Moderate
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- WHY -->
+
+                <div class="ai-card">
+
+                    <span class="decision-label">
+                        WHY THIS DECISION?
+                    </span>
+
+
+                    <div class="decision-reasons">
+
+
+                        <div class="reason">
+
+                            <span>
+                                Fatigue
+                            </span>
+
+                            <strong id="reason-fatigue">
+                                Normal
+                            </strong>
+
+                        </div>
+
+
+                        <div class="reason">
+
+                            <span>
+                                Recovery
+                            </span>
+
+                            <strong id="reason-recovery">
+                                Normal
+                            </strong>
+
+                        </div>
+
+
+                        <div class="reason">
+
+                            <span>
+                                Training Load
+                            </span>
+
+                            <strong id="reason-training">
+                                Moderate
+                            </strong>
+
+                        </div>
+
+
+                        <div class="reason">
+
+                            <span>
+                                Heart Rate
+                            </span>
+
+                            <strong id="reason-heart">
+                                Normal
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- RECOMMENDATION -->
+
+            <div class="ai-recommendation-box">
+
+                <div class="ai-icon">
+                    AI
+                </div>
+
+
+                <div>
+
+                    <span class="decision-label">
+                        RECOMMENDATION
+                    </span>
+
+
+                    <p id="ai-recommendation">
+
+                        Your current indicators look relatively stable.
+                        You can continue with your planned training.
+
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <button
+                class="coach-button"
+                id="coach-button"
+            >
+                Analyze My Condition →
+            </button>
+
+        </section>
+
+
+
+        <!-- =========================
+             ADAPTIVE SCHEDULE
+        ========================== -->
+
+        <section class="schedule-panel"
+                 id="schedule">
+
+
+            <div class="section-title">
+
+                <div>
+
+                    <p class="small-text">
+                        ADAPTIVE PLAN
+                    </p>
+
+                    <h2>
+                        Training Schedule
+                    </h2>
+
+                    <p class="section-subtitle">
+                        Automatically adjusted according to current condition
+                    </p>
+
+                </div>
+
+
+                <span class="date"
+                      id="current-date">
+                    Today
+                </span>
+
+            </div>
+
+
+
+            <div class="training">
+
+
+                <div class="time">
+                    18:00
+                </div>
+
+
+                <div class="training-info">
+
+                    <strong id="main-training-name">
+                        Strength Training
+                    </strong>
+
+                    <span id="main-training-description">
+                        60 min · Planned session
+                    </span>
+
+                </div>
+
+
+                <div class="training-status">
+
+                    Recommended intensity:
+
+                    <strong id="recommended-intensity">
+                        Moderate
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="training">
+
+
+                <div class="time">
+                    20:00
+                </div>
+
+
+                <div class="training-info">
+
+                    <strong>
+                        Recovery Session
+                    </strong>
+
+                    <span>
+                        20 min · Mobility & stretching
+                    </span>
+
+                </div>
+
+
+                <div class="training-status">
+
+                    Status:
+
+                    <strong id="recovery-session-status">
+                        Recommended
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="adaptive-note">
+
+                <span>
+                    AI
+                </span>
+
+                <p id="schedule-note">
+                    Schedule is currently adapted to your condition.
+                </p>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             COACH DASHBOARD
+        ========================== -->
+
+        <section class="coach-dashboard"
+                 id="coach-dashboard">
+
+
+            <div class="section-title">
+
+                <div>
+
+                    <p class="small-text">
+                        TEAM OVERVIEW
+                    </p>
+
+                    <h2>
+                        Coach Dashboard
+                    </h2>
+
+                    <p class="section-subtitle">
+                        Athlete monitoring overview
+                    </p>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="team-grid">
+
+
+                <div class="athlete-card">
+
+                    <div class="athlete-top">
+
+                        <div class="athlete-avatar">
+                            A
+                        </div>
+
+                        <span class="team-risk"
+                              id="team-risk">
+                            Moderate
+                        </span>
+
+                    </div>
+
+
+                    <strong>
+                        Athlete A
+                    </strong>
+
+                    <span>
+                        Current session
+                    </span>
+
+
+                    <div class="athlete-metrics">
+
+                        <div>
+                            <small>HR</small>
+                            <strong id="team-hr">--</strong>
+                        </div>
+
+                        <div>
+                            <small>Fatigue</small>
+                            <strong id="team-fatigue">--</strong>
+                        </div>
+
+                        <div>
+                            <small>Recovery</small>
+                            <strong id="team-recovery">--</strong>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+                <div class="coach-summary">
+
+                    <span class="decision-label">
+                        SYSTEM SUMMARY
+                    </span>
+
+                    <h3 id="coach-summary-title">
+                        Monitoring active
+                    </h3>
+
+                    <p id="coach-summary-text">
+                        Collecting current athlete indicators
+                        and generating adaptive recommendations.
+                    </p>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <!-- =========================
+             HISTORY
+        ========================== -->
+
+        <section class="history-panel"
+                 id="history">
+
+
+            <div class="section-title">
+
+                <div>
+
+                    <p class="small-text">
+                        PERFORMANCE HISTORY
+                    </p>
+
+                    <h2>
+                        Recent Measurements
+                    </h2>
+
+                </div>
+
+
+                <span class="date">
+                    Live session
+                </span>
+
+            </div>
+
+
+
+            <div class="history-chart">
+
+
+                <div class="history-row">
+
+                    <span>
+                        Heart Rate
+                    </span>
+
+                    <div class="history-bar">
+
+                        <div
+                            id="history-heart"
+                            class="history-fill"
+                        ></div>
+
+                    </div>
+
+                    <strong id="history-heart-value">
+                        0
+                    </strong>
+
+                </div>
+
+
+
+                <div class="history-row">
+
+                    <span>
+                        Fatigue
+                    </span>
+
+                    <div class="history-bar">
+
+                        <div
+                            id="history-fatigue"
+                            class="history-fill"
+                        ></div>
+
+                    </div>
+
+                    <strong id="history-fatigue-value">
+                        0%
+                    </strong>
+
+                </div>
+
+
+
+                <div class="history-row">
+
+                    <span>
+                        Recovery
+                    </span>
+
+                    <div class="history-bar">
+
+                        <div
+                            id="history-recovery"
+                            class="history-fill"
+                        ></div>
+
+                    </div>
+
+                    <strong id="history-recovery-value">
+                        0%
+                    </strong>
+
+                </div>
+
+
+
+                <div class="history-row">
+
+                    <span>
+                        Training Load
+                    </span>
+
+                    <div class="history-bar">
+
+                        <div
+                            id="history-training"
+                            class="history-fill"
+                        ></div>
+
+                    </div>
+
+                    <strong id="history-training-value">
+                        0%
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+
+            <div class="history-table">
+
+                <div class="history-table-header">
+
+                    <span>TIME</span>
+                    <span>HR</span>
+                    <span>FATIGUE</span>
+                    <span>RECOVERY</span>
+                    <span>RISK</span>
+
+                </div>
+
+
+                <div id="history-list">
+
+                    <div class="empty-history">
+                        Collecting measurements...
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+
+        <footer class="footer">
+
+            ATHLETIX MVP · Demo Mode · AI-assisted risk estimation,
+            not a medical diagnosis.
+
+        </footer>
+
+    </main>
+
+</div>
+
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+
+</body>
+
+</html>
