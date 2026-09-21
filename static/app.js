@@ -1,1035 +1,566 @@
-// ==========================================
-// ATHLETIX — FINAL MVP ENGINE
-// ==========================================
-
-
-// ==========================================
-// HISTORY
-// ==========================================
-
 const heartRateHistory = [];
 const fatigueHistory = [];
 const recoveryHistory = [];
 const trainingLoadHistory = [];
 const riskHistory = [];
-
 const measurementHistory = [];
 
 
-// ==========================================
-// DEMO SENSOR DATA
-// ==========================================
+/* ==========================================
+   HELPERS
+========================================== */
+
+function clamp(value, min, max) {
+    return Math.max(min, Math.min(max, value));
+}
+
+
+function setText(id, value) {
+    const element = document.getElementById(id);
+
+    if (element) {
+        element.textContent = value;
+    }
+}
+
+
+function setWidth(id, value) {
+    const element = document.getElementById(id);
+
+    if (element) {
+        element.style.width =
+            `${clamp(value, 0, 100)}%`;
+    }
+}
+
+
+/* ==========================================
+   SENSOR DATA
+========================================== */
 
 function generateSensorData() {
 
     return {
 
         heartRate:
-            Math.floor(75 + Math.random() * 45),
+            Math.floor(Math.random() * 45) + 75,
 
         fatigue:
-            Math.floor(45 + Math.random() * 45),
+            Math.floor(Math.random() * 45) + 45,
 
         recovery:
-            Math.floor(40 + Math.random() * 45),
+            Math.floor(Math.random() * 45) + 40,
 
         trainingLoad:
-            Math.floor(55 + Math.random() * 40)
+            Math.floor(Math.random() * 40) + 55
 
     };
+
 }
 
 
-// ==========================================
-// RISK ENGINE
-// ==========================================
+/* ==========================================
+   RISK CALCULATION
+========================================== */
 
-function calculateRisk(
-    heartRate,
-    fatigue,
-    recovery,
-    trainingLoad
-) {
+function calculateRisk(data) {
 
     let risk = 0;
 
 
-    if (heartRate > 100) {
+    if (data.heartRate > 100) {
         risk += 25;
     }
 
-    if (fatigue > 70) {
+
+    if (data.fatigue > 70) {
         risk += 30;
     }
 
-    if (recovery < 50) {
+
+    if (data.recovery < 50) {
         risk += 25;
     }
 
-    if (trainingLoad > 80) {
+
+    if (data.trainingLoad > 80) {
         risk += 20;
     }
 
 
-    return Math.min(risk, 100);
+    return clamp(
+        risk,
+        0,
+        100
+    );
+
 }
 
 
-// ==========================================
-// CONDITION
-// ==========================================
+/* ==========================================
+   CONDITION
+========================================== */
 
 function getCondition(risk) {
 
     if (risk <= 30) {
-
-        return {
-
-            title: "Low Load",
-
-            description:
-                "Your current indicators look stable. Planned training can continue."
-
-        };
-
+        return "Low";
     }
 
 
     if (risk <= 60) {
-
-        return {
-
-            title: "Moderate Load",
-
-            description:
-                "Some indicators suggest accumulated fatigue. Training intensity should be monitored."
-
-        };
-
+        return "Moderate";
     }
 
 
-    return {
+    return "High";
 
-        title: "High Load",
-
-        description:
-            "Multiple indicators are elevated. Recovery should be prioritized."
-
-    };
 }
 
 
-// ==========================================
-// AI DECISION ENGINE
-// ==========================================
-
-function getAIDecision(
-    heartRate,
-    fatigue,
-    recovery,
-    trainingLoad,
-    risk
-) {
-
-
-    // HIGH RISK
-
-    if (risk > 60) {
-
-        return {
-
-            title: "Recovery Priority",
-
-            text:
-                "Multiple indicators are elevated. High-intensity training should be avoided today.",
-
-            intensity:
-                "Recovery",
-
-            recommendation:
-                "Prioritize recovery, mobility and low-intensity activity. Avoid adding significant training load.",
-
-            schedule:
-                "Today's strength session has been reduced to a recovery-focused session.",
-
-            reasons: {
-
-                fatigue:
-                    fatigue > 70 ? "High" : "Normal",
-
-                recovery:
-                    recovery < 50 ? "Low" : "Moderate",
-
-                training:
-                    trainingLoad > 80 ? "High" : "Moderate",
-
-                heart:
-                    heartRate > 100 ? "Elevated" : "Normal"
-
-            }
-
-        };
-
-    }
-
-
-    // MODERATE RISK
-
-    if (risk > 30) {
-
-        return {
-
-            title: "Moderate Training",
-
-            text:
-                "Your indicators show moderate accumulated load. Training can continue with reduced intensity.",
-
-            intensity:
-                "Moderate",
-
-            recommendation:
-                "Keep today's session moderate and include additional recovery time between intense efforts.",
-
-            schedule:
-                "Strength training remains scheduled, but intensity has been reduced to moderate.",
-
-            reasons: {
-
-                fatigue:
-                    fatigue > 70 ? "Elevated" : "Normal",
-
-                recovery:
-                    recovery < 50 ? "Low" : "Moderate",
-
-                training:
-                    trainingLoad > 80 ? "High" : "Moderate",
-
-                heart:
-                    heartRate > 100 ? "Elevated" : "Normal"
-
-            }
-
-        };
-
-    }
-
-
-    // STABLE
-
-    return {
-
-        title: "Normal Training",
-
-        text:
-            "Current indicators are relatively stable and support the planned training session.",
-
-        intensity:
-            "Normal",
-
-        recommendation:
-            "Continue with the planned workout while monitoring your condition during the session.",
-
-        schedule:
-            "Planned strength training remains unchanged.",
-
-        reasons: {
-
-            fatigue:
-                fatigue > 70 ? "Elevated" : "Normal",
-
-            recovery:
-                recovery < 50 ? "Low" : "Good",
-
-            training:
-                trainingLoad > 80 ? "High" : "Moderate",
-
-            heart:
-                heartRate > 100 ? "Elevated" : "Normal"
-
-        }
-
-    };
-}
-
-
-// ==========================================
-// UPDATE AI COACH
-// ==========================================
-
-function updateAICoach(
-    heartRate,
-    fatigue,
-    recovery,
-    trainingLoad,
-    risk
-) {
-
-    const decision =
-        getAIDecision(
-            heartRate,
-            fatigue,
-            recovery,
-            trainingLoad,
-            risk
-        );
-
-
-    document.getElementById(
-        "ai-decision-title"
-    ).textContent =
-        decision.title;
-
-
-    document.getElementById(
-        "ai-decision-text"
-    ).textContent =
-        decision.text;
-
-
-    document.getElementById(
-        "ai-intensity"
-    ).textContent =
-        decision.intensity;
-
-
-    document.getElementById(
-        "ai-recommendation"
-    ).textContent =
-        decision.recommendation;
-
-
-    document.getElementById(
-        "reason-fatigue"
-    ).textContent =
-        decision.reasons.fatigue;
-
-
-    document.getElementById(
-        "reason-recovery"
-    ).textContent =
-        decision.reasons.recovery;
-
-
-    document.getElementById(
-        "reason-training"
-    ).textContent =
-        decision.reasons.training;
-
-
-    document.getElementById(
-        "reason-heart"
-    ).textContent =
-        decision.reasons.heart;
-
-
-    // COLORS
-
-    const intensity =
-        document.getElementById(
-            "ai-intensity"
-        );
-
-
-    intensity.className = "";
-
-
-    if (risk <= 30) {
-
-        intensity.classList.add(
-            "positive"
-        );
-
-    }
-
-    else if (risk <= 60) {
-
-        intensity.classList.add(
-            "warning"
-        );
-
-    }
-
-    else {
-
-        intensity.classList.add(
-            "danger"
-        );
-
-    }
-
-
-    // SCHEDULE
-
-    document.getElementById(
-        "recommended-intensity"
-    ).textContent =
-        decision.intensity;
-
-
-    document.getElementById(
-        "schedule-note"
-    ).textContent =
-        decision.schedule;
-
-
-    const trainingName =
-        document.getElementById(
-            "main-training-name"
-        );
-
-
-    const trainingDescription =
-        document.getElementById(
-            "main-training-description"
-        );
-
-
-    const recoveryStatus =
-        document.getElementById(
-            "recovery-session-status"
-        );
-
-
-    if (risk > 60) {
-
-        trainingName.textContent =
-            "Recovery Session";
-
-        trainingDescription.textContent =
-            "30 min · Mobility, stretching & low-intensity movement";
-
-        recoveryStatus.textContent =
-            "Priority";
-
-    }
-
-    else if (risk > 30) {
-
-        trainingName.textContent =
-            "Modified Strength Training";
-
-        trainingDescription.textContent =
-            "45 min · Reduced intensity session";
-
-        recoveryStatus.textContent =
-            "Recommended";
-
-    }
-
-    else {
-
-        trainingName.textContent =
-            "Strength Training";
-
-        trainingDescription.textContent =
-            "60 min · Planned session";
-
-        recoveryStatus.textContent =
-            "Recommended";
-
-    }
-}
-
-
-// ==========================================
-// MONITORING
-// ==========================================
-
-function updateMonitoring(
-    heartRate,
-    fatigue,
-    recovery,
-    trainingLoad,
-    risk
-) {
-
-
-    document.getElementById(
-        "monitor-heart-rate"
-    ).textContent =
-        heartRate;
-
-
-    const heartStatus =
-        document.getElementById(
-            "monitor-heart-status"
-        );
-
-
-    if (heartRate > 100) {
-
-        heartStatus.textContent =
-            "● Elevated heart rate";
-
-        heartStatus.className =
-            "danger";
-
-    }
-
-    else {
-
-        heartStatus.textContent =
-            "● Normal heart rate";
-
-        heartStatus.className =
-            "positive";
-
-    }
-
-
-    document.getElementById(
-        "monitor-chart-value"
-    ).textContent =
-        heartRate + " BPM";
-
-
-    // FATIGUE
-
-    document.getElementById(
-        "monitor-fatigue"
-    ).textContent =
-        fatigue + "%";
-
-
-    document.getElementById(
-        "fatigue-progress"
-    ).style.width =
-        fatigue + "%";
-
-
-    document.getElementById(
-        "monitor-fatigue-status"
-    ).textContent =
-        fatigue > 70
-            ? "Elevated"
-            : "Normal";
-
-
-    // RECOVERY
-
-    document.getElementById(
-        "monitor-recovery"
-    ).textContent =
-        recovery + "%";
-
-
-    document.getElementById(
-        "recovery-progress"
-    ).style.width =
-        recovery + "%";
-
-
-    document.getElementById(
-        "monitor-recovery-status"
-    ).textContent =
-        recovery < 50
-            ? "Low"
-            : "Moderate";
-
-
-    // TRAINING
-
-    document.getElementById(
-        "monitor-training"
-    ).textContent =
-        trainingLoad + "%";
-
-
-    document.getElementById(
-        "training-progress"
-    ).style.width =
-        trainingLoad + "%";
-
-
-    document.getElementById(
-        "monitor-training-status"
-    ).textContent =
-        trainingLoad > 80
-            ? "High"
-            : "Moderate";
-
-
-    // RISK
-
-    document.getElementById(
-        "monitor-risk"
-    ).textContent =
-        risk + "%";
-
-
-    document.getElementById(
-        "risk-progress"
-    ).style.width =
-        risk + "%";
-
-
-    const riskStatus =
-        document.getElementById(
-            "monitor-risk-status"
-        );
-
-
-    if (risk <= 30) {
-
-        riskStatus.textContent =
-            "Low risk";
-
-    }
-
-    else if (risk <= 60) {
-
-        riskStatus.textContent =
-            "Moderate risk";
-
-    }
-
-    else {
-
-        riskStatus.textContent =
-            "High risk";
-
-    }
-}
-
-
-// ==========================================
-// MAIN DASHBOARD
-// ==========================================
-
-function updateDashboard() {
-
-    const data =
-        generateSensorData();
-
-
-    const heartRate =
-        data.heartRate;
-
-    const fatigue =
-        data.fatigue;
-
-    const recovery =
-        data.recovery;
-
-    const trainingLoad =
-        data.trainingLoad;
-
-
-    const risk =
-        calculateRisk(
-            heartRate,
-            fatigue,
-            recovery,
-            trainingLoad
-        );
-
+/* ==========================================
+   AI DECISION
+========================================== */
+
+function getAIDecision(data, risk) {
 
     const condition =
         getCondition(risk);
 
 
-    // HISTORY
+    if (condition === "High") {
 
-    heartRateHistory.push(
-        heartRate
-    );
+        return {
 
-    fatigueHistory.push(
-        fatigue
-    );
+            title:
+                "Recovery recommended",
 
-    recoveryHistory.push(
-        recovery
-    );
+            text:
+                "Current indicators suggest elevated training stress. The session should be adapted to prioritize recovery.",
 
-    trainingLoadHistory.push(
-        trainingLoad
-    );
+            intensity:
+                "LOW",
 
-    riskHistory.push(
-        risk
-    );
+            recommendation:
+                "Reduce training intensity and focus on mobility, technique or recovery work.",
 
+            schedule:
+                "High-risk indicators detected. Training schedule has been adapted.",
 
-    if (
-        heartRateHistory.length > 20
-    ) {
+            reasons: {
 
-        heartRateHistory.shift();
-        fatigueHistory.shift();
-        recoveryHistory.shift();
-        trainingLoadHistory.shift();
-        riskHistory.shift();
+                fatigue:
+                    data.fatigue > 70
+                        ? "Elevated fatigue"
+                        : "Fatigue within range",
 
-    }
+                recovery:
+                    data.recovery < 50
+                        ? "Low recovery"
+                        : "Recovery within range",
 
+                training:
+                    data.trainingLoad > 80
+                        ? "High training load"
+                        : "Training load within range",
 
-    // TABLE
+                heart:
+                    data.heartRate > 100
+                        ? "Elevated heart rate"
+                        : "Heart rate within range"
 
-    const now =
-        new Date();
-
-
-    const time =
-        now.toLocaleTimeString(
-            [],
-            {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit"
             }
-        );
 
-
-    measurementHistory.unshift({
-
-        time:
-            time,
-
-        heartRate:
-            heartRate,
-
-        fatigue:
-            fatigue,
-
-        recovery:
-            recovery,
-
-        risk:
-            risk
-
-    });
-
-
-    if (
-        measurementHistory.length > 8
-    ) {
-
-        measurementHistory.pop();
+        };
 
     }
 
 
-    // MAIN VALUES
+    if (condition === "Moderate") {
 
-    document.getElementById(
-        "heart-rate"
-    ).textContent =
-        heartRate;
+        return {
 
+            title:
+                "Train with caution",
 
-    document.getElementById(
-        "fatigue"
-    ).textContent =
-        fatigue;
+            text:
+                "Some indicators are elevated. A controlled session with close monitoring is recommended.",
 
+            intensity:
+                "MODERATE",
 
-    document.getElementById(
-        "recovery"
-    ).textContent =
-        recovery;
+            recommendation:
+                "Keep intensity controlled and add recovery time if fatigue increases.",
 
+            schedule:
+                "Moderate-risk indicators detected. Training intensity is being monitored.",
 
-    document.getElementById(
-        "training-load"
-    ).textContent =
-        trainingLoad;
+            reasons: {
 
+                fatigue:
+                    data.fatigue > 70
+                        ? "Elevated fatigue"
+                        : "Fatigue acceptable",
 
-    document.getElementById(
-        "injury-risk"
-    ).textContent =
-        risk + "%";
+                recovery:
+                    data.recovery < 50
+                        ? "Recovery needs attention"
+                        : "Recovery acceptable",
 
+                training:
+                    data.trainingLoad > 80
+                        ? "High training load"
+                        : "Training load acceptable",
 
-    // CONDITION
+                heart:
+                    data.heartRate > 100
+                        ? "Elevated heart rate"
+                        : "Heart rate acceptable"
 
-    document.getElementById(
-        "condition-status"
-    ).textContent =
-        condition.title;
-
-
-    document.getElementById(
-        "condition-description"
-    ).textContent =
-        condition.description;
-
-
-    // STATUS
-
-    const heartStatus =
-        document.getElementById(
-            "heart-status"
-        );
-
-
-    if (heartRate > 100) {
-
-        heartStatus.textContent =
-            "● Elevated";
-
-        heartStatus.className =
-            "danger";
-
-    }
-
-    else {
-
-        heartStatus.textContent =
-            "● Normal";
-
-        heartStatus.className =
-            "positive";
-
-    }
-
-
-    const fatigueStatus =
-        document.getElementById(
-            "fatigue-status"
-        );
-
-
-    if (fatigue > 70) {
-
-        fatigueStatus.textContent =
-            "● Elevated";
-
-        fatigueStatus.className =
-            "warning";
-
-    }
-
-    else {
-
-        fatigueStatus.textContent =
-            "● Normal";
-
-        fatigueStatus.className =
-            "positive";
-
-    }
-
-
-    const recoveryStatus =
-        document.getElementById(
-            "recovery-status"
-        );
-
-
-    if (recovery < 50) {
-
-        recoveryStatus.textContent =
-            "● Low";
-
-        recoveryStatus.className =
-            "danger";
-
-    }
-
-    else {
-
-        recoveryStatus.textContent =
-            "● Moderate";
-
-        recoveryStatus.className =
-            "warning";
-
-    }
-
-
-    const trainingStatus =
-        document.getElementById(
-            "training-status"
-        );
-
-
-    if (trainingLoad > 80) {
-
-        trainingStatus.textContent =
-            "● High";
-
-        trainingStatus.className =
-            "danger";
-
-    }
-
-    else {
-
-        trainingStatus.textContent =
-            "● Moderate";
-
-        trainingStatus.className =
-            "warning";
-
-    }
-
-
-    // AI
-
-    updateAICoach(
-        heartRate,
-        fatigue,
-        recovery,
-        trainingLoad,
-        risk
-    );
-
-
-    // MONITORING
-
-    updateMonitoring(
-        heartRate,
-        fatigue,
-        recovery,
-        trainingLoad,
-        risk
-    );
-
-
-    // COACH DASHBOARD
-
-    updateCoachDashboard(
-        heartRate,
-        fatigue,
-        recovery,
-        risk
-    );
-
-
-    // DATE
-
-    document.getElementById(
-        "current-date"
-    ).textContent =
-        new Date().toLocaleDateString(
-            "en-US",
-            {
-                month: "long",
-                day: "numeric"
             }
-        );
+
+        };
+
+    }
 
 
-    // CHARTS
+    return {
 
-    drawHeartRateChart();
+        title:
+            "Ready for planned training",
 
-    updateHistoryPanel();
+        text:
+            "Current physical indicators are relatively stable and support the planned session.",
 
-    updateHistoryTable();
+        intensity:
+            "NORMAL",
+
+        recommendation:
+            "Continue with the planned session and maintain normal recovery habits.",
+
+        schedule:
+            "Stable indicators detected. Planned schedule can continue.",
+
+        reasons: {
+
+            fatigue:
+                "Fatigue within range",
+
+            recovery:
+                "Recovery within range",
+
+            training:
+                "Training load within range",
+
+            heart:
+                "Heart rate within range"
+
+        }
+
+    };
+
 }
 
 
-// ==========================================
-// COACH DASHBOARD
-// ==========================================
+/* ==========================================
+   AI COACH
+========================================== */
+
+function updateAICoach(data, risk) {
+
+    const decision =
+        getAIDecision(
+            data,
+            risk
+        );
+
+
+    setText(
+        "ai-decision-title",
+        decision.title
+    );
+
+
+    setText(
+        "ai-decision-text",
+        decision.text
+    );
+
+
+    setText(
+        "ai-intensity",
+        decision.intensity
+    );
+
+
+    setText(
+        "ai-recommendation",
+        decision.recommendation
+    );
+
+
+    setText(
+        "reason-fatigue",
+        decision.reasons.fatigue
+    );
+
+
+    setText(
+        "reason-recovery",
+        decision.reasons.recovery
+    );
+
+
+    setText(
+        "reason-training",
+        decision.reasons.training
+    );
+
+
+    setText(
+        "reason-heart",
+        decision.reasons.heart
+    );
+
+
+    setText(
+        "recommended-intensity",
+        decision.intensity
+    );
+
+
+    setText(
+        "schedule-note",
+        decision.schedule
+    );
+
+
+    setText(
+        "main-training-name",
+
+        risk > 60
+            ? "Recovery Session"
+            : risk > 30
+                ? "Controlled Training"
+                : "Planned Training"
+
+    );
+
+
+    setText(
+        "main-training-description",
+        decision.recommendation
+    );
+
+
+    setText(
+        "recovery-session-status",
+
+        risk > 60
+            ? "Recommended"
+            : "Available"
+
+    );
+
+}
+
+
+/* ==========================================
+   LIVE MONITORING
+========================================== */
+
+function updateMonitoring(data, risk) {
+
+    const condition =
+        getCondition(risk);
+
+
+    setText(
+        "monitor-heart-rate",
+        `${data.heartRate} BPM`
+    );
+
+
+    setText(
+        "monitor-heart-status",
+
+        data.heartRate > 100
+            ? "Elevated"
+            : "Normal"
+
+    );
+
+
+    setText(
+        "monitor-chart-value",
+        `${data.heartRate} BPM`
+    );
+
+
+    setText(
+        "monitor-fatigue",
+        `${data.fatigue}%`
+    );
+
+
+    setWidth(
+        "fatigue-progress",
+        data.fatigue
+    );
+
+
+    setText(
+        "monitor-fatigue-status",
+
+        data.fatigue > 70
+            ? "High"
+            : "Moderate"
+
+    );
+
+
+    setText(
+        "monitor-recovery",
+        `${data.recovery}%`
+    );
+
+
+    setWidth(
+        "recovery-progress",
+        data.recovery
+    );
+
+
+    setText(
+        "monitor-recovery-status",
+
+        data.recovery < 50
+            ? "Low"
+            : "Good"
+
+    );
+
+
+    setText(
+        "monitor-training",
+        `${data.trainingLoad}%`
+    );
+
+
+    setWidth(
+        "training-progress",
+        data.trainingLoad
+    );
+
+
+    setText(
+        "monitor-training-status",
+
+        data.trainingLoad > 80
+            ? "High"
+            : "Normal"
+
+    );
+
+
+    setText(
+        "monitor-risk",
+        `${risk}%`
+    );
+
+
+    setWidth(
+        "risk-progress",
+        risk
+    );
+
+
+    setText(
+        "monitor-risk-status",
+        condition
+    );
+
+}
+
+
+/* ==========================================
+   COACH DASHBOARD
+========================================== */
 
 function updateCoachDashboard(
-    heartRate,
-    fatigue,
-    recovery,
+    data,
     risk
 ) {
 
-
-    document.getElementById(
-        "team-hr"
-    ).textContent =
-        heartRate;
-
-
-    document.getElementById(
-        "team-fatigue"
-    ).textContent =
-        fatigue + "%";
+    setText(
+        "team-hr",
+        `${data.heartRate} BPM`
+    );
 
 
-    document.getElementById(
-        "team-recovery"
-    ).textContent =
-        recovery + "%";
+    setText(
+        "team-fatigue",
+        `${data.fatigue}%`
+    );
 
 
-    const teamRisk =
-        document.getElementById(
-            "team-risk"
+    setText(
+        "team-recovery",
+        `${data.recovery}%`
+    );
+
+
+    if (risk > 60) {
+
+        setText(
+            "coach-summary-title",
+            "Attention required"
         );
 
 
-    const summaryTitle =
-        document.getElementById(
-            "coach-summary-title"
+        setText(
+            "coach-summary-text",
+            "Current indicators show elevated training stress. Consider reducing load and prioritizing recovery."
         );
-
-
-    const summaryText =
-        document.getElementById(
-            "coach-summary-text"
-        );
-
-
-    if (risk <= 30) {
-
-        teamRisk.textContent =
-            "Low";
-
-        teamRisk.className =
-            "team-risk positive";
-
-
-        summaryTitle.textContent =
-            "Athlete condition stable";
-
-
-        summaryText.textContent =
-            "Current indicators support the planned training session.";
 
     }
 
-    else if (risk <= 60) {
+    else if (risk > 30) {
 
-        teamRisk.textContent =
-            "Moderate";
-
-        teamRisk.className =
-            "team-risk warning";
-
-
-        summaryTitle.textContent =
-            "Moderate accumulated load";
+        setText(
+            "coach-summary-title",
+            "Monitor athlete"
+        );
 
 
-        summaryText.textContent =
-            "The system recommends controlled training intensity and additional recovery.";
+        setText(
+            "coach-summary-text",
+            "Some indicators are elevated. Continue monitoring the athlete during the session."
+        );
 
     }
 
     else {
 
-        teamRisk.textContent =
-            "High";
-
-        teamRisk.className =
-            "team-risk danger";
-
-
-        summaryTitle.textContent =
-            "Recovery priority";
+        setText(
+            "coach-summary-title",
+            "Stable condition"
+        );
 
 
-        summaryText.textContent =
-            "Multiple indicators are elevated. High-intensity training should be avoided.";
+        setText(
+            "coach-summary-text",
+            "Current indicators are relatively stable and support the planned session."
+        );
 
     }
+
 }
 
 
-// ==========================================
-// HEART RATE CHART
-// ==========================================
+/* ==========================================
+   HEART RATE CHART
+========================================== */
 
 function drawHeartRateChart() {
 
@@ -1039,242 +570,471 @@ function drawHeartRateChart() {
         );
 
 
-    if (!line) {
+    if (
+        !line ||
+        heartRateHistory.length === 0
+    ) {
         return;
     }
 
 
-    const points = [];
+    const width = 600;
+
+    const height = 180;
 
 
-    const minHR = 70;
-    const maxHR = 125;
+    const min =
+        Math.min(
+            ...heartRateHistory
+        ) - 5;
 
 
-    heartRateHistory.forEach(
-        function(value, index) {
+    const max =
+        Math.max(
+            ...heartRateHistory
+        ) + 5;
 
 
-            const divisor =
-                Math.max(
-                    heartRateHistory.length - 1,
-                    1
-                );
+    const range =
+        Math.max(
+            1,
+            max - min
+        );
 
 
-            const x =
-                (index / divisor) * 1000;
+    const points =
+        heartRateHistory
+            .map(
+                (value, index) => {
+
+                    const x =
+                        heartRateHistory.length === 1
+
+                            ? width / 2
+
+                            : (
+                                index /
+                                (
+                                    heartRateHistory.length - 1
+                                )
+                            ) * width;
 
 
-            const normalized =
-                (value - minHR) /
-                (maxHR - minHR);
+                    const y =
+                        height -
+                        (
+                            (
+                                value - min
+                            ) /
+                            range
+                        ) * height;
 
 
-            const y =
-                280 -
-                normalized * 240;
+                    return `${x},${y}`;
 
-
-            points.push(
-                `${x},${y}`
-            );
-
-        }
-    );
+                }
+            )
+            .join(" ");
 
 
     line.setAttribute(
         "points",
-        points.join(" ")
+        points
     );
+
 }
 
 
-// ==========================================
-// HISTORY PANEL
-// ==========================================
+/* ==========================================
+   HISTORY PANEL
+========================================== */
 
-function updateHistoryPanel() {
+function updateHistoryPanel(data) {
 
-    if (
-        heartRateHistory.length === 0
-    ) {
-
-        return;
-    }
-
-
-    const heart =
-        heartRateHistory[
-            heartRateHistory.length - 1
-        ];
-
-
-    const fatigue =
-        fatigueHistory[
-            fatigueHistory.length - 1
-        ];
-
-
-    const recovery =
-        recoveryHistory[
-            recoveryHistory.length - 1
-        ];
-
-
-    const training =
-        trainingLoadHistory[
-            trainingLoadHistory.length - 1
-        ];
-
-
-    document.getElementById(
-        "history-heart"
-    ).style.width =
-        Math.min(
-            ((heart - 70) / 55) * 100,
+    setWidth(
+        "history-heart",
+        clamp(
+            data.heartRate - 50,
+            0,
             100
-        ) + "%";
+        )
+    );
 
 
-    document.getElementById(
-        "history-fatigue"
-    ).style.width =
-        fatigue + "%";
+    setText(
+        "history-heart-value",
+        `${data.heartRate} BPM`
+    );
 
 
-    document.getElementById(
-        "history-recovery"
-    ).style.width =
-        recovery + "%";
+    setWidth(
+        "history-fatigue",
+        data.fatigue
+    );
 
 
-    document.getElementById(
-        "history-training"
-    ).style.width =
-        training + "%";
+    setText(
+        "history-fatigue-value",
+        `${data.fatigue}%`
+    );
 
 
-    document.getElementById(
-        "history-heart-value"
-    ).textContent =
-        heart + " BPM";
+    setWidth(
+        "history-recovery",
+        data.recovery
+    );
 
 
-    document.getElementById(
-        "history-fatigue-value"
-    ).textContent =
-        fatigue + "%";
+    setText(
+        "history-recovery-value",
+        `${data.recovery}%`
+    );
 
 
-    document.getElementById(
-        "history-recovery-value"
-    ).textContent =
-        recovery + "%";
+    setWidth(
+        "history-training",
+        data.trainingLoad
+    );
 
 
-    document.getElementById(
-        "history-training-value"
-    ).textContent =
-        training + "%";
+    setText(
+        "history-training-value",
+        `${data.trainingLoad}%`
+    );
+
 }
 
 
-// ==========================================
-// HISTORY TABLE
-// ==========================================
+/* ==========================================
+   HISTORY TABLE
+========================================== */
 
 function updateHistoryTable() {
 
-    const container =
+    const list =
         document.getElementById(
             "history-list"
         );
 
 
-    if (!container) {
+    if (!list) {
         return;
     }
 
 
-    container.innerHTML = "";
+    if (
+        measurementHistory.length === 0
+    ) {
+
+        list.innerHTML = `
+            <div class="empty-history">
+                Collecting measurements...
+            </div>
+        `;
+
+        return;
+
+    }
 
 
-    measurementHistory.forEach(
-        function(measurement) {
+    list.innerHTML =
 
+        measurementHistory
+            .slice()
+            .reverse()
+            .map(
+                item => `
 
-            let riskClass =
-                "risk-low";
+                    <div class="history-list-item">
 
+                        <span>
+                            ${item.time}
+                        </span>
 
-            if (
-                measurement.risk > 30 &&
-                measurement.risk <= 60
-            ) {
+                        <span>
+                            ${item.heartRate}
+                        </span>
 
-                riskClass =
-                    "risk-medium";
+                        <span>
+                            ${item.fatigue}%
+                        </span>
 
-            }
+                        <span>
+                            ${item.recovery}%
+                        </span>
 
+                        <span>
+                            ${item.risk}%
+                        </span>
 
-            if (
-                measurement.risk > 60
-            ) {
+                    </div>
 
-                riskClass =
-                    "risk-high";
+                `
+            )
+            .join("");
 
-            }
-
-
-            const row =
-                document.createElement(
-                    "div"
-                );
-
-
-            row.className =
-                "history-table-row";
-
-
-            row.innerHTML = `
-
-                <span>
-                    ${measurement.time}
-                </span>
-
-                <span>
-                    ${measurement.heartRate} BPM
-                </span>
-
-                <span>
-                    ${measurement.fatigue}%
-                </span>
-
-                <span>
-                    ${measurement.recovery}%
-                </span>
-
-                <span class="${riskClass}">
-                    ${measurement.risk}%
-                </span>
-
-            `;
-
-
-            container.appendChild(row);
-
-        }
-    );
 }
 
 
-// ==========================================
-// AI BUTTON
-// ==========================================
+/* ==========================================
+   MAIN DASHBOARD
+========================================== */
+
+function updateDashboard() {
+
+    const data =
+        generateSensorData();
+
+
+    const risk =
+        calculateRisk(data);
+
+
+    const condition =
+        getCondition(risk);
+
+
+    /* HISTORY */
+
+    heartRateHistory.push(
+        data.heartRate
+    );
+
+
+    fatigueHistory.push(
+        data.fatigue
+    );
+
+
+    recoveryHistory.push(
+        data.recovery
+    );
+
+
+    trainingLoadHistory.push(
+        data.trainingLoad
+    );
+
+
+    riskHistory.push(
+        risk
+    );
+
+
+    if (
+        heartRateHistory.length > 20
+    ) {
+        heartRateHistory.shift();
+    }
+
+
+    if (
+        fatigueHistory.length > 20
+    ) {
+        fatigueHistory.shift();
+    }
+
+
+    if (
+        recoveryHistory.length > 20
+    ) {
+        recoveryHistory.shift();
+    }
+
+
+    if (
+        trainingLoadHistory.length > 20
+    ) {
+        trainingLoadHistory.shift();
+    }
+
+
+    if (
+        riskHistory.length > 20
+    ) {
+        riskHistory.shift();
+    }
+
+
+    /* MEASUREMENT */
+
+    measurementHistory.push({
+
+        time:
+            new Date().toLocaleTimeString(
+                [],
+                {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                    second: "2-digit"
+                }
+            ),
+
+        heartRate:
+            data.heartRate,
+
+        fatigue:
+            data.fatigue,
+
+        recovery:
+            data.recovery,
+
+        risk:
+            risk
+
+    });
+
+
+    if (
+        measurementHistory.length > 20
+    ) {
+        measurementHistory.shift();
+    }
+
+
+    /* MAIN VALUES */
+
+    setText(
+        "heart-rate",
+        data.heartRate
+    );
+
+
+    setText(
+        "fatigue",
+        `${data.fatigue}%`
+    );
+
+
+    setText(
+        "recovery",
+        `${data.recovery}%`
+    );
+
+
+    setText(
+        "training-load",
+        `${data.trainingLoad}%`
+    );
+
+
+    setText(
+        "injury-risk",
+        `${risk}%`
+    );
+
+
+    setText(
+        "heart-status",
+
+        data.heartRate > 100
+            ? "● Elevated"
+            : "● Normal"
+
+    );
+
+
+    setText(
+        "fatigue-status",
+
+        data.fatigue > 70
+            ? "● High"
+            : "● Moderate"
+
+    );
+
+
+    setText(
+        "recovery-status",
+
+        data.recovery < 50
+            ? "● Low"
+            : "● Good"
+
+    );
+
+
+    setText(
+        "training-status",
+
+        data.trainingLoad > 80
+            ? "● High"
+            : "● Normal"
+
+    );
+
+
+    setText(
+        "condition-status",
+        condition
+    );
+
+
+    setText(
+        "condition-description",
+
+        condition === "High"
+
+            ? "Current indicators suggest increased training stress."
+
+            : condition === "Moderate"
+
+                ? "Some indicators need closer monitoring."
+
+                : "Current indicators are relatively stable."
+
+    );
+
+
+    setText(
+        "current-date",
+        new Date().toLocaleDateString(
+            [],
+            {
+                year: "numeric",
+                month: "long",
+                day: "numeric"
+            }
+        )
+    );
+
+
+    /* UPDATE SECTIONS */
+
+    updateAICoach(
+        data,
+        risk
+    );
+
+
+    updateMonitoring(
+        data,
+        risk
+    );
+
+
+    updateCoachDashboard(
+        data,
+        risk
+    );
+
+
+    updateHistoryPanel(
+        data
+    );
+
+
+    updateHistoryTable();
+
+
+    drawHeartRateChart();
+
+}
+
+
+/* ==========================================
+   AI COACH BUTTON
+========================================== */
 
 const coachButton =
     document.getElementById(
@@ -1286,85 +1046,31 @@ if (coachButton) {
 
     coachButton.addEventListener(
         "click",
-        function() {
+        () => {
 
-
-            const button =
-                this;
-
-
-            button.textContent =
+            coachButton.textContent =
                 "AI is analyzing...";
 
 
             setTimeout(
-                function() {
+                () => {
+
+                    updateDashboard();
 
 
-                    const heartRate =
-                        Number(
-                            document.getElementById(
-                                "heart-rate"
-                            ).textContent
-                        );
-
-
-                    const fatigue =
-                        Number(
-                            document.getElementById(
-                                "fatigue"
-                            ).textContent
-                        );
-
-
-                    const recovery =
-                        Number(
-                            document.getElementById(
-                                "recovery"
-                            ).textContent
-                        );
-
-
-                    const trainingLoad =
-                        Number(
-                            document.getElementById(
-                                "training-load"
-                            ).textContent
-                        );
-
-
-                    const risk =
-                        calculateRisk(
-                            heartRate,
-                            fatigue,
-                            recovery,
-                            trainingLoad
-                        );
-
-
-                    updateAICoach(
-                        heartRate,
-                        fatigue,
-                        recovery,
-                        trainingLoad,
-                        risk
-                    );
-
-
-                    button.textContent =
-                        "Analysis Complete ✓";
+                    coachButton.textContent =
+                        "Analysis complete ✓";
 
 
                     setTimeout(
-                        function() {
+                        () => {
 
-                            button.textContent =
-                                "Analyze My Condition →";
+                            coachButton.textContent =
+                                "Run AI Analysis";
 
                         },
-                        1500
+                        1400
                     );
-
 
                 },
                 900
@@ -1372,12 +1078,457 @@ if (coachButton) {
 
         }
     );
+
 }
 
 
-// ==========================================
-// START ATHLETIX
-// ==========================================
+/* ==========================================
+   MENTAL HEALTH / WELLBEING
+========================================== */
+
+(function () {
+
+
+    /* --------------------------------------
+       SLIDER SETUP
+    -------------------------------------- */
+
+    function setupSlider(
+        sliderId,
+        valueId
+    ) {
+
+        const slider =
+            document.getElementById(
+                sliderId
+            );
+
+
+        const value =
+            document.getElementById(
+                valueId
+            );
+
+
+        if (
+            !slider ||
+            !value
+        ) {
+            return;
+        }
+
+
+        value.textContent =
+            `${slider.value}/5`;
+
+
+        slider.addEventListener(
+            "input",
+            () => {
+
+                value.textContent =
+                    `${slider.value}/5`;
+
+            }
+        );
+
+    }
+
+
+    setupSlider(
+        "sleep-slider",
+        "sleep-value"
+    );
+
+
+    setupSlider(
+        "stress-slider",
+        "stress-value"
+    );
+
+
+    setupSlider(
+        "mood-slider",
+        "mood-value"
+    );
+
+
+    setupSlider(
+        "motivation-slider",
+        "motivation-value"
+    );
+
+
+
+    /* --------------------------------------
+       ANALYZE WELLBEING
+    -------------------------------------- */
+
+    function analyzeMentalHealth() {
+
+
+        const sleep =
+            Number(
+                document.getElementById(
+                    "sleep-slider"
+                ).value
+            );
+
+
+        const stress =
+            Number(
+                document.getElementById(
+                    "stress-slider"
+                ).value
+            );
+
+
+        const mood =
+            Number(
+                document.getElementById(
+                    "mood-slider"
+                ).value
+            );
+
+
+        const motivation =
+            Number(
+                document.getElementById(
+                    "motivation-slider"
+                ).value
+            );
+
+
+        /*
+            Sleep:
+            1 = poor
+            5 = excellent
+
+            Stress:
+            1 = low
+            5 = high
+
+            Mood:
+            1 = low
+            5 = positive
+
+            Motivation:
+            1 = low
+            5 = high
+        */
+
+
+        const readiness =
+            Math.round(
+
+                (
+                    sleep +
+                    (6 - stress) +
+                    mood +
+                    motivation
+                )
+                / 20
+                * 100
+
+            );
+
+
+        updateMentalResult(
+            readiness,
+            sleep,
+            stress,
+            mood,
+            motivation
+        );
+
+    }
+
+
+
+    /* --------------------------------------
+       MENTAL RESULT
+    -------------------------------------- */
+
+    function updateMentalResult(
+        readiness,
+        sleep,
+        stress,
+        mood,
+        motivation
+    ) {
+
+
+        /* SCORE */
+
+        setText(
+            "mental-readiness",
+            `${readiness}%`
+        );
+
+
+        setText(
+            "mental-ring-value",
+            readiness
+        );
+
+
+        /* FACTORS */
+
+        setText(
+            "mental-factor-sleep",
+
+            sleep <= 2
+                ? "Poor"
+                : sleep === 3
+                    ? "Moderate"
+                    : "Good"
+
+        );
+
+
+        setText(
+            "mental-factor-stress",
+
+            stress >= 4
+                ? "High"
+                : stress === 3
+                    ? "Moderate"
+                    : "Low"
+
+        );
+
+
+        setText(
+            "mental-factor-mood",
+
+            mood <= 2
+                ? "Low"
+                : mood === 3
+                    ? "Stable"
+                    : "Positive"
+
+        );
+
+
+        setText(
+            "mental-factor-motivation",
+
+            motivation <= 2
+                ? "Low"
+                : motivation === 3
+                    ? "Moderate"
+                    : "High"
+
+        );
+
+
+        const badge =
+            document.getElementById(
+                "mental-status-badge"
+            );
+
+
+        const ring =
+            document.getElementById(
+                "mental-ring"
+            );
+
+
+        /* ----------------------------------
+           HIGH READINESS
+        ---------------------------------- */
+
+        if (
+            readiness >= 75
+        ) {
+
+            badge.textContent =
+                "READY";
+
+
+            badge.className =
+                "mental-badge positive";
+
+
+            setText(
+                "mental-result-title",
+                "Positive readiness"
+            );
+
+
+            setText(
+                "mental-result-text",
+                "Your self-reported wellbeing indicators are currently supportive of training."
+            );
+
+
+            setText(
+                "mental-recommendation-text",
+                "Continue with the planned session while maintaining normal recovery habits."
+            );
+
+
+            ring.style.borderColor =
+                "#35d07f";
+
+        }
+
+
+        /* ----------------------------------
+           MODERATE READINESS
+        ---------------------------------- */
+
+        else if (
+            readiness >= 50
+        ) {
+
+            badge.textContent =
+                "MONITOR";
+
+
+            badge.className =
+                "mental-badge warning";
+
+
+            setText(
+                "mental-result-title",
+                "Monitor wellbeing"
+            );
+
+
+            setText(
+                "mental-result-text",
+                "Some wellbeing indicators suggest that your readiness may be lower than usual."
+            );
+
+
+            setText(
+                "mental-recommendation-text",
+                "Consider a controlled session, monitor how you feel, and allow additional recovery if needed."
+            );
+
+
+            ring.style.borderColor =
+                "#f0c85c";
+
+        }
+
+
+        /* ----------------------------------
+           LOW READINESS
+        ---------------------------------- */
+
+        else {
+
+            badge.textContent =
+                "RECOVERY";
+
+
+            badge.className =
+                "mental-badge danger";
+
+
+            setText(
+                "mental-result-title",
+                "Recovery may be helpful"
+            );
+
+
+            setText(
+                "mental-result-text",
+                "Your self-reported indicators suggest reduced readiness today."
+            );
+
+
+            setText(
+                "mental-recommendation-text",
+                "Consider reducing training intensity and prioritizing recovery. If you are struggling emotionally, talk to a trusted person or qualified professional."
+            );
+
+
+            ring.style.borderColor =
+                "#ff6b6b";
+
+        }
+
+    }
+
+
+
+    /* --------------------------------------
+       MENTAL HEALTH BUTTON
+    -------------------------------------- */
+
+    const mentalButton =
+        document.getElementById(
+            "mental-analyze-button"
+        );
+
+
+    if (mentalButton) {
+
+        mentalButton.addEventListener(
+            "click",
+            () => {
+
+
+                mentalButton.textContent =
+                    "AI is analyzing...";
+
+
+                setTimeout(
+                    () => {
+
+
+                        analyzeMentalHealth();
+
+
+                        mentalButton.textContent =
+                            "Analysis Complete ✓";
+
+
+                        setTimeout(
+                            () => {
+
+                                mentalButton.textContent =
+                                    "Analyze Wellbeing →";
+
+                            },
+                            1500
+                        );
+
+
+                    },
+                    700
+                );
+
+            }
+        );
+
+    }
+
+
+
+    /* --------------------------------------
+       INITIAL RESULT
+    -------------------------------------- */
+
+    if (
+        document.getElementById(
+            "mental-health"
+        )
+    ) {
+
+        analyzeMentalHealth();
+
+    }
+
+})();
+
+
+/* ==========================================
+   START DASHBOARD
+========================================== */
 
 updateDashboard();
 
